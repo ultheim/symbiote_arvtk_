@@ -272,14 +272,18 @@ window.processMemoryChat = async function(userText, apiKey, modelHigh, modelLow,
         try {
             console.log(`🔍 Searching: Owner=[${primaryOwner}] Keys=[${searchKeys}]`);
             const memReq = await fetch(appsScriptUrl, {
-                method: "POST", 
-                headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify({ 
-                    action: "retrieve_complex", 
-                    owner: primaryOwner,
-                    keywords: searchKeys 
-                })
-            });
+			    method: "POST", 
+			    mode: "cors", // Mandatory for GitHub Pages
+			    redirect: "follow", // Mandatory because Google redirects to a temporary URL
+			    headers: { 
+			        "Content-Type": "text/plain" // Use text/plain to avoid "Preflight" CORS checks
+			    },
+			    body: JSON.stringify({ 
+			        action: "retrieve_complex", 
+			        owner: primaryOwner,
+			        keywords: searchKeys 
+			    })
+			});
             const memRes = await memReq.json();
             
             if (memRes.found) {
@@ -384,4 +388,5 @@ window.processMemoryChat = async function(userText, apiKey, modelHigh, modelLow,
     }
 
     return { choices: [{ message: { content: generationResult.cleaned } }] };
+
 };
