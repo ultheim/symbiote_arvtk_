@@ -245,15 +245,18 @@ window.processMemoryChat = async function(userText, apiKey, modelHigh, modelLow,
 
         // [NEW FIX]: Extract Names from Relationship Context
         // If Step 0 found "Ferdy" or "Indriani", add them to the search!
-        if (relationshipContext && querySubject !== "Arvin") {
+        if (relationshipContext) {
             const usefulNames = [];
+            // Regex to capture text inside [Subject: ...]
             const matches = relationshipContext.matchAll(/\[Subject:\s*([^\]]+)\]/g);
             for (const m of matches) {
                 const name = m[1].trim();
-                if (name !== "Arvin" && !usefulNames.includes(name)) {
+                // Filter out Arvin and duplicates
+                if (name !== "Arvin" && name.length > 2 && !usefulNames.includes(name)) {
                     usefulNames.push(name);
                 }
             }
+
             searchKeys = searchKeys.concat(usefulNames);
             console.log("➕ Added Relationship Names to Search:", usefulNames);
         }
@@ -390,3 +393,4 @@ window.processMemoryChat = async function(userText, apiKey, modelHigh, modelLow,
     return { choices: [{ message: { content: generationResult.cleaned } }] };
 
 };
+
