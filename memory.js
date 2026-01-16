@@ -270,7 +270,20 @@ window.processMemoryChat = async function(userText, apiKey, modelHigh, modelLow,
 
         // C. Determine Primary Subject 
         // (Existing logic: use querySubject unless we have a specific new fact owner)
-        const primaryOwner = (atomicEntries[0] && atomicEntries[0].owner) ? atomicEntries[0].owner : querySubject;
+        let targetOwners = [querySubject]; 
+        if (atomicEntries[0] && atomicEntries[0].owner) targetOwners.push(atomicEntries[0].owner);
+        
+        // If we found specific relative names, add them as target owners too
+        if (relationshipContext) {
+            const matches = relationshipContext.matchAll(/\[Subject:\s*([^\]]+)\]/g);
+            for (const m of matches) {
+                const name = m[1].trim();
+                if (!targetOwners.includes(name)) targetOwners.push(name);
+            }
+        }
+        
+        // Join them with commas (the Script handles this)
+        const primaryOwner = targetOwners.join(",");
 
         try {
             console.log(`🔍 Searching: Owner=[${primaryOwner}] Keys=[${searchKeys}]`);
@@ -393,4 +406,5 @@ window.processMemoryChat = async function(userText, apiKey, modelHigh, modelLow,
     return { choices: [{ message: { content: generationResult.cleaned } }] };
 
 };
+
 
