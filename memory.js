@@ -245,18 +245,15 @@ window.processMemoryChat = async function(userText, apiKey, modelHigh, modelLow,
 
         // [NEW FIX]: Extract Names from Relationship Context
         // If Step 0 found "Ferdy" or "Indriani", add them to the search!
-        if (relationshipContext) {
+        if (relationshipContext && querySubject !== "Arvin") {
             const usefulNames = [];
-            // Regex to capture text inside [Subject: ...]
             const matches = relationshipContext.matchAll(/\[Subject:\s*([^\]]+)\]/g);
             for (const m of matches) {
                 const name = m[1].trim();
-                // Filter out Arvin and duplicates
-                if (name !== "Arvin" && name.length > 2 && !usefulNames.includes(name)) {
+                if (name !== "Arvin" && !usefulNames.includes(name)) {
                     usefulNames.push(name);
                 }
             }
-
             searchKeys = searchKeys.concat(usefulNames);
             console.log("➕ Added Relationship Names to Search:", usefulNames);
         }
@@ -270,20 +267,7 @@ window.processMemoryChat = async function(userText, apiKey, modelHigh, modelLow,
 
         // C. Determine Primary Subject 
         // (Existing logic: use querySubject unless we have a specific new fact owner)
-        let targetOwners = [querySubject]; 
-        if (atomicEntries[0] && atomicEntries[0].owner) targetOwners.push(atomicEntries[0].owner);
-        
-        // If we found specific relative names, add them as target owners too
-        if (relationshipContext) {
-            const matches = relationshipContext.matchAll(/\[Subject:\s*([^\]]+)\]/g);
-            for (const m of matches) {
-                const name = m[1].trim();
-                if (!targetOwners.includes(name)) targetOwners.push(name);
-            }
-        }
-        
-        // Join them with commas (the Script handles this)
-        const primaryOwner = targetOwners.join(",");
+        const primaryOwner = (atomicEntries[0] && atomicEntries[0].owner) ? atomicEntries[0].owner : querySubject;
 
         try {
             console.log(`🔍 Searching: Owner=[${primaryOwner}] Keys=[${searchKeys}]`);
@@ -406,5 +390,3 @@ window.processMemoryChat = async function(userText, apiKey, modelHigh, modelLow,
     return { choices: [{ message: { content: generationResult.cleaned } }] };
 
 };
-
-
